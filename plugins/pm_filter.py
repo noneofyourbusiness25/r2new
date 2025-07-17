@@ -821,28 +821,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         
         # Check verification for non-premium users
         if not await check_verification(client, clicked) and VERIFY == True and clicked not in PREMIUM_USER:
-            verify_url = await get_token(client, clicked, f"https://telegram.me/{temp.U_NAME}?start=")
-            try:
-                await client.send_message(
-                    chat_id=clicked,
-                    text=f"<b>You are not verified! Kindly verify to continue!</b>",
-                    reply_markup=InlineKeyboardMarkup([
-                        [InlineKeyboardButton("Verify", url=verify_url)],
-                        [InlineKeyboardButton("⚡ʜᴏᴡ ᴛᴏ ᴠᴇʀɪғʏ⚡", url="https://t.me/HowToUseBot101/8/")]
-                    ]),
-                    protect_content=True
-                )
-                await query.answer(
-                    text="Verification link sent! Click below to open the bot in PM.",
-                    show_alert=True,
-                    url=f"https://t.me/{temp.U_NAME}?start=verifyme"
-                )
-            except Exception:
-                await query.answer(
-                    text="Please start the bot in PM so I can send you the verification link!",
-                    show_alert=True,
-                    url=f"https://t.me/{temp.U_NAME}?start=verifyme"
-                )
+            await query.answer(url=f"https://t.me/{temp.U_NAME}?start=verifyme")
             return
         if CUSTOM_FILE_CAPTION:
             try:
@@ -883,28 +862,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         
         # Check verification for non-premium users
         if not await check_verification(client, clicked) and VERIFY == True and clicked not in PREMIUM_USER:
-            verify_url = await get_token(client, clicked, f"https://telegram.me/{temp.U_NAME}?start=")
-            try:
-                await client.send_message(
-                    chat_id=clicked,
-                    text=f"<b>You are not verified! Kindly verify to continue!</b>",
-                    reply_markup=InlineKeyboardMarkup([
-                        [InlineKeyboardButton("Verify", url=verify_url)],
-                        [InlineKeyboardButton("⚡ʜᴏᴡ ᴛᴏ ᴠᴇʀɪғʏ⚡", url="https://t.me/HowToUseBot101/8/")]
-                    ]),
-                    protect_content=True
-                )
-                await query.answer(
-                    text="Verification link sent! Click below to open the bot in PM.",
-                    show_alert=True,
-                    url=f"https://t.me/{temp.U_NAME}?start=verifyme"
-                )
-            except Exception:
-                await query.answer(
-                    text="Please start the bot in PM so I can send you the verification link!",
-                    show_alert=True,
-                    url=f"https://t.me/{temp.U_NAME}?start=verifyme"
-                )
+            await query.answer(url=f"https://t.me/{temp.U_NAME}?start=verifyme")
             return
         
         try:
