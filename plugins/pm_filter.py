@@ -821,15 +821,21 @@ async def cb_handler(client: Client, query: CallbackQuery):
         
         # Check verification for non-premium users
         if not await check_verification(client, clicked) and VERIFY == True and clicked not in PREMIUM_USER:
-            btn = [[InlineKeyboardButton("Verify", url=await get_token(client, clicked, f"https://telegram.me/{temp.U_NAME}?start="))],
-                   [InlineKeyboardButton("⚡ʜᴏᴡ ᴛᴏ ᴠᴇʀɪғʏ⚡", url="https://t.me/HowToUseBot101/8/")]]
-            
-            await query.message.reply_text(
-                text="<b>You are not verified !\nKindly verify to continue !</b>",
-                protect_content=True,
-                reply_markup=InlineKeyboardMarkup(btn)
-            )
-            return await query.answer()
+            verify_url = await get_token(client, clicked, f"https://telegram.me/{temp.U_NAME}?start=")
+            try:
+                await client.send_message(
+                    chat_id=clicked,
+                    text=f"<b>You are not verified! Kindly verify to continue!</b>",
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton("Verify", url=verify_url)],
+                        [InlineKeyboardButton("⚡ʜᴏᴡ ᴛᴏ ᴠᴇʀɪғʏ⚡", url="https://t.me/HowToUseBot101/8/")]
+                    ]),
+                    protect_content=True
+                )
+                await query.answer("Verification link sent to your PM!", show_alert=True)
+            except Exception:
+                await query.answer("Please start the bot in PM so I can send you the verification link!", show_alert=True)
+            return
         if CUSTOM_FILE_CAPTION:
             try:
                 f_caption = CUSTOM_FILE_CAPTION.format(file_name='' if title is None else title,
@@ -869,15 +875,21 @@ async def cb_handler(client: Client, query: CallbackQuery):
         
         # Check verification for non-premium users
         if not await check_verification(client, clicked) and VERIFY == True and clicked not in PREMIUM_USER:
-            btn = [[InlineKeyboardButton("Verify", url=await get_token(client, clicked, f"https://telegram.me/{temp.U_NAME}?start="))],
-                   [InlineKeyboardButton("⚡ʜᴏᴡ ᴛᴏ ᴠᴇʀɪғʏ⚡", url="https://t.me/HowToUseBot101/8/")]]
-            
-            await query.message.reply_text(
-                text="<b>You are not verified !\nKindly verify to continue !</b>",
-                protect_content=True,
-                reply_markup=InlineKeyboardMarkup(btn)
-            )
-            return await query.answer()
+            verify_url = await get_token(client, clicked, f"https://telegram.me/{temp.U_NAME}?start=")
+            try:
+                await client.send_message(
+                    chat_id=clicked,
+                    text=f"<b>You are not verified! Kindly verify to continue!</b>",
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton("Verify", url=verify_url)],
+                        [InlineKeyboardButton("⚡ʜᴏᴡ ᴛᴏ ᴠᴇʀɪғʏ⚡", url="https://t.me/HowToUseBot101/8/")]
+                    ]),
+                    protect_content=True
+                )
+                await query.answer("Verification link sent to your PM!", show_alert=True)
+            except Exception:
+                await query.answer("Please start the bot in PM so I can send you the verification link!", show_alert=True)
+            return
         
         try:
             if settings['is_shortlink'] and clicked not in PREMIUM_USER:
@@ -1983,7 +1995,7 @@ async def auto_filter(client, msg, spoll=False):
             return
         if len(message.text) < 100:
             search = message.text
-            m=await message.reply_text(f"<b><i> 𝖲𝖾𝖺𝗋𝖼𝗁𝗂𝗇𝗀 𝖿𝗈𝗋 '{search}' 🔎</i></b>")
+            m=await message.reply_text(f"<b><i> 𝖲𝖾𝖺𝗋𝖼𝗂𝗇𝗀 𝖿𝗈𝗋 '{search}' 🔎</i></b>")
             search = search.lower()
             find = search.split(" ")
             search = ""
@@ -2011,7 +2023,7 @@ async def auto_filter(client, msg, spoll=False):
     else:
         message = msg.message.reply_to_message  # msg will be callback query
         search, files, offset, total_results = spoll
-        m=await message.reply_text(f"<b><i> 𝖲𝖾𝖺𝗋𝖼𝗁𝗂𝗇𝗀 𝖿𝗈𝗋 '{search}' 🔎</i></b>")
+        m=await message.reply_text(f"<b><i> 𝖲𝖾𝖺𝗋𝖼𝗂𝗇𝗀 𝖿𝗈𝗋 '{search}' 🔎</i></b>")
         settings = await get_settings(message.chat.id)
         await msg.message.delete()
     pre = 'filep' if settings['file_secure'] else 'file'
