@@ -21,7 +21,7 @@ from info import *
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
-from utils import get_size, is_subscribed, get_poster, search_gagala, temp, get_settings, save_group_settings, get_shortlink, get_tutorial, send_all, get_cap
+from utils import get_size, is_subscribed, get_poster, search_gagala, temp, get_settings, save_group_settings, get_shortlink, get_tutorial, send_all, get_cap, check_verification, get_token
 from database.users_chats_db import db
 from database.ia_filterdb import Media, get_file_details, get_search_results, get_bad_files
 from database.filters_mdb import (
@@ -818,6 +818,18 @@ async def cb_handler(client: Client, query: CallbackQuery):
         size = get_size(files.file_size)
         f_caption = files.caption
         settings = await get_settings(query.message.chat.id)
+        
+        # Check verification for non-premium users
+        if not await check_verification(client, clicked) and VERIFY == True and clicked not in PREMIUM_USER:
+            btn = [[InlineKeyboardButton("Verify", url=await get_token(client, clicked, f"https://telegram.me/{temp.U_NAME}?start="))],
+                   [InlineKeyboardButton("⚡ʜᴏᴡ ᴛᴏ ᴠᴇʀɪғʏ⚡", url="https://t.me/HowToUseBot101/8/")]]
+            
+            await query.message.reply_text(
+                text="<b>You are not verified !\nKindly verify to continue !</b>",
+                protect_content=True,
+                reply_markup=InlineKeyboardMarkup(btn)
+            )
+            return await query.answer()
         if CUSTOM_FILE_CAPTION:
             try:
                 f_caption = CUSTOM_FILE_CAPTION.format(file_name='' if title is None else title,
@@ -854,6 +866,19 @@ async def cb_handler(client: Client, query: CallbackQuery):
         clicked = query.from_user.id
         ident, key = query.data.split("#")
         settings = await get_settings(query.message.chat.id)
+        
+        # Check verification for non-premium users
+        if not await check_verification(client, clicked) and VERIFY == True and clicked not in PREMIUM_USER:
+            btn = [[InlineKeyboardButton("Verify", url=await get_token(client, clicked, f"https://telegram.me/{temp.U_NAME}?start="))],
+                   [InlineKeyboardButton("⚡ʜᴏᴡ ᴛᴏ ᴠᴇʀɪғʏ⚡", url="https://t.me/HowToUseBot101/8/")]]
+            
+            await query.message.reply_text(
+                text="<b>You are not verified !\nKindly verify to continue !</b>",
+                protect_content=True,
+                reply_markup=InlineKeyboardMarkup(btn)
+            )
+            return await query.answer()
+        
         try:
             if settings['is_shortlink'] and clicked not in PREMIUM_USER:
                 await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start=sendfiles1_{key}")
