@@ -120,15 +120,21 @@ async def next_page(bot, query):
     settings = await get_settings(query.message.chat.id)
     pre = 'filep' if settings['file_secure'] else 'file'
     if settings['button']:
-        btn = [
-            [
+        btn = []
+        for file in files:
+            # Check verification for the user
+            is_verified = await check_verification(bot, query.from_user.id)
+            is_admin_or_premium = query.from_user.id in ADMINS or query.from_user.id in PREMIUM_USER
+            if is_verified or not VERIFY or is_admin_or_premium:
+                file_url = f"https://telegram.me/{temp.U_NAME}?start=file_{file.file_id}"
+            else:
+                file_url = await get_token(bot, query.from_user.id, f"https://telegram.me/{temp.U_NAME}?start=")
+            btn.append([
                 InlineKeyboardButton(
-                    text=f"[{get_size(file.file_size)}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file.file_name.split()))}", callback_data=f'{pre}#{file.file_id}'
-                ),
-            ]
-            for file in files
-        ]
-
+                    text=f"[{get_size(file.file_size)}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file.file_name.split()))}",
+                    url=file_url
+                )
+            ])
         btn.insert(0, 
             [
                 InlineKeyboardButton(f'Sᴇʟᴇᴄᴛ ➢', 'select'),
@@ -350,14 +356,21 @@ async def filter_languages_cb_handler(client: Client, query: CallbackQuery):
     settings = await get_settings(message.chat.id)
     pre = 'filep' if settings['file_secure'] else 'file'
     if settings["button"]:
-        btn = [
-            [
+        btn = []
+        for file in files:
+            # Check verification for the user
+            is_verified = await check_verification(bot, query.from_user.id)
+            is_admin_or_premium = query.from_user.id in ADMINS or query.from_user.id in PREMIUM_USER
+            if is_verified or not VERIFY or is_admin_or_premium:
+                file_url = f"https://telegram.me/{temp.U_NAME}?start=file_{file.file_id}"
+            else:
+                file_url = await get_token(bot, query.from_user.id, f"https://telegram.me/{temp.U_NAME}?start=")
+            btn.append([
                 InlineKeyboardButton(
-                    text=f"[{get_size(file.file_size)}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file.file_name.split()))}", callback_data=f'{pre}#{file.file_id}'
-                ),
-            ]
-            for file in files
-        ]
+                    text=f"[{get_size(file.file_size)}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file.file_name.split()))}",
+                    url=file_url
+                )
+            ])
         btn.insert(0, 
             [
                 InlineKeyboardButton(f'Sᴇʟᴇᴄᴛ ➢', 'select'),
@@ -536,14 +549,21 @@ async def filter_seasons_cb_handler(client: Client, query: CallbackQuery):
     settings = await get_settings(message.chat.id)
     pre = 'filep' if settings['file_secure'] else 'file'
     if settings["button"]:
-        btn = [
-            [
+        btn = []
+        for file in files:
+            # Check verification for the user
+            is_verified = await check_verification(bot, query.from_user.id)
+            is_admin_or_premium = query.from_user.id in ADMINS or query.from_user.id in PREMIUM_USER
+            if is_verified or not VERIFY or is_admin_or_premium:
+                file_url = f"https://telegram.me/{temp.U_NAME}?start=file_{file.file_id}"
+            else:
+                file_url = await get_token(bot, query.from_user.id, f"https://telegram.me/{temp.U_NAME}?start=")
+            btn.append([
                 InlineKeyboardButton(
-                    text=f"[{get_size(file.file_size)}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file.file_name.split()))}", callback_data=f'{pre}#{file.file_id}'
-                ),
-            ]
-            for file in files
-        ]
+                    text=f"[{get_size(file.file_size)}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file.file_name.split()))}",
+                    url=file_url
+                )
+            ])
         btn.insert(0, [
             InlineKeyboardButton("𝐒𝐞𝐧𝐝 𝐀𝐥𝐥", callback_data=f"sendfiles#{key}"),
             InlineKeyboardButton("Sᴇʟᴇᴄᴛ ᴀɢᴀɪɴ", callback_data=f"seasons#{key}")
@@ -832,7 +852,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     ]),
                     protect_content=True
                 )
-                await query.answer("Verification link sent to your PM!", show_alert=True)
+                await query.answer(url=verify_url)
             except Exception:
                 await query.answer("Please start the bot in PM so I can send you the verification link!", show_alert=True)
             return
@@ -886,7 +906,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     ]),
                     protect_content=True
                 )
-                await query.answer("Verification link sent to your PM!", show_alert=True)
+                await query.answer(url=verify_url)
             except Exception:
                 await query.answer("Please start the bot in PM so I can send you the verification link!", show_alert=True)
             return
@@ -2032,14 +2052,21 @@ async def auto_filter(client, msg, spoll=False):
     temp.GETALL[key] = files
     temp.SHORT[message.from_user.id] = message.chat.id
     if settings["button"]:
-        btn = [
-            [
+        btn = []
+        for file in files:
+            # Check verification for the user
+            is_verified = await check_verification(bot, query.from_user.id)
+            is_admin_or_premium = query.from_user.id in ADMINS or query.from_user.id in PREMIUM_USER
+            if is_verified or not VERIFY or is_admin_or_premium:
+                file_url = f"https://telegram.me/{temp.U_NAME}?start=file_{file.file_id}"
+            else:
+                file_url = await get_token(bot, query.from_user.id, f"https://telegram.me/{temp.U_NAME}?start=")
+            btn.append([
                 InlineKeyboardButton(
-                    text=f"[{get_size(file.file_size)}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file.file_name.split()))}", callback_data=f'{pre}#{file.file_id}'
-                ),
-            ]
-            for file in files
-        ]
+                    text=f"[{get_size(file.file_size)}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file.file_name.split()))}",
+                    url=file_url
+                )
+            ])
         btn.insert(0, 
             [
                 InlineKeyboardButton(f'Sᴇʟᴇᴄᴛ ➢', 'select'),
