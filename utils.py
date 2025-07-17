@@ -26,6 +26,7 @@ import aiohttp
 from shortzy import Shortzy
 import http.client
 import json
+import pickle
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -35,12 +36,50 @@ BTN_URL_REGEX = re.compile(
 )
 
 imdb = Cinemagoer() 
-TOKENS = {}
-VERIFIED = {}
+
+# Load persistent data
+def load_verification_data():
+    """Load TOKENS and VERIFIED from files"""
+    global TOKENS, VERIFIED
+    try:
+        if os.path.exists('tokens.pkl'):
+            with open('tokens.pkl', 'rb') as f:
+                TOKENS = pickle.load(f)
+        else:
+            TOKENS = {}
+    except:
+        TOKENS = {}
+    
+    try:
+        if os.path.exists('verified.pkl'):
+            with open('verified.pkl', 'rb') as f:
+                VERIFIED = pickle.load(f)
+        else:
+            VERIFIED = {}
+    except:
+        VERIFIED = {}
+
+def save_verification_data():
+    """Save TOKENS and VERIFIED to files"""
+    try:
+        with open('tokens.pkl', 'wb') as f:
+            pickle.dump(TOKENS, f)
+    except:
+        pass
+    
+    try:
+        with open('verified.pkl', 'wb') as f:
+            pickle.dump(VERIFIED, f)
+    except:
+        pass
+
+# Initialize the dictionaries
+load_verification_data()
+
 BANNED = {}
 SECOND_SHORTENER = {}
-SMART_OPEN = '“'
-SMART_CLOSE = '”'
+SMART_OPEN = '"'
+SMART_CLOSE = '"'
 START_CHAR = ('\'', '"', SMART_OPEN)
 
 # temp db for banned 
@@ -603,6 +642,7 @@ async def get_token(bot, userid, link):
         await bot.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(user.id, user.mention))
     token = ''.join(random.choices(string.ascii_letters + string.digits, k=7))
     TOKENS[user.id] = {token: False}
+    save_verification_data() # Save after creating token
     link = f"{link}verify-{user.id}-{token}"
     shortened_verify_url = await get_verify_shorted_link(link)
     return str(shortened_verify_url)
@@ -616,12 +656,21 @@ async def verify_user(bot, userid, token):
     tz = pytz.timezone('Asia/Kolkata')
     today = date.today()
     VERIFIED[user.id] = str(today)
+    save_verification_data() # Save after successful verification
 
 async def check_verification(bot, userid):
+    # Import here to avoid circular import
+    from info import ADMINS, PREMIUM_USER
+    
     user = await bot.get_users(userid)
     if not await db.is_user_exist(user.id):
         await db.add_user(user.id, user.first_name)
         await bot.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(user.id, user.mention))
+    
+    # Bypass verification for admins and premium users
+    if user.id in ADMINS or user.id in PREMIUM_USER:
+        return True
+    
     tz = pytz.timezone('Asia/Kolkata')
     today = date.today()
     if user.id in VERIFIED.keys():
@@ -641,7 +690,7 @@ async def send_all(bot, userid, files, ident, chat_id, user_name, query):
     if 'is_shortlink' in settings.keys():
         ENABLE_SHORTLINK = settings['is_shortlink']
     else:
-        await save_group_settings(message.chat.id, 'is_shortlink', False)
+        await save_group_settings(query.chat.id, 'is_shortlink', False)
         ENABLE_SHORTLINK = False
     try:
         if ENABLE_SHORTLINK:
@@ -735,12 +784,12 @@ async def get_cap(settings, remaining_seconds, files, query, total_results, sear
                 for file in files:
                     cap += f"<b>📁 <a href='https://telegram.me/{temp.U_NAME}?start=files_{file.file_id}'>[{get_size(file.file_size)}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file.file_name.split()))}\n\n</a></b>"
             else:
-                cap = f"<b>Tʜᴇ Rᴇꜱᴜʟᴛꜱ Fᴏʀ ☞ {search}\n\nRᴇǫᴜᴇsᴛᴇᴅ Bʏ ☞ {message.from_user.mention}\n\nʀᴇsᴜʟᴛ sʜᴏᴡ ɪɴ ☞ {remaining_seconds} sᴇᴄᴏɴᴅs\n\nᴘᴏᴡᴇʀᴇᴅ ʙʏ ☞ : {message.chat.title}\n\n⚠️ ᴀꜰᴛᴇʀ 5 ᴍɪɴᴜᴛᴇꜱ ᴛʜɪꜱ ᴍᴇꜱꜱᴀɢᴇ ᴡɪʟʟ ʙᴇ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴅᴇʟᴇᴛᴇᴅ 🗑️\n\n</b>"
+                cap = f"<b>Tʜᴇ Rᴇꜱᴜʟᴛꜱ Fᴏʀ ☞ {search}\n\nRᴇǫᴜᴇsᴛᴇᴅ Bʏ ☞ {query.from_user.mention}\n\nʀᴇsᴜʟᴛ sʜᴏᴡ ɪɴ ☞ {remaining_seconds} sᴇᴄᴏɴᴅs\n\nᴘᴏᴡᴇʀᴇᴅ ʙʏ ☞ : {query.chat.title}\n\n⚠️ ᴀꜰᴛᴇʀ 5 ᴍɪɴᴜᴛᴇꜱ ᴛʜɪꜱ ᴍᴇꜱꜱᴀɢᴇ ᴡɪʟʟ ʙᴇ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴅᴇʟᴇᴛᴇᴅ 🗑️\n\n</b>"
                 cap+="<b><u>🍿 Your Movie Files 👇</u></b>\n\n"
                 for file in files:
                     cap += f"<b>📁 <a href='https://telegram.me/{temp.U_NAME}?start=files_{file.file_id}'>[{get_size(file.file_size)}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file.file_name.split()))}\n\n</a></b>"
     else:
-        cap = f"<b>Tʜᴇ Rᴇꜱᴜʟᴛꜱ Fᴏʀ ☞ {search}\n\nRᴇǫᴜᴇsᴛᴇᴅ Bʏ ☞ {message.from_user.mention}\n\nʀᴇsᴜʟᴛ sʜᴏᴡ ɪɴ ☞ {remaining_seconds} sᴇᴄᴏɴᴅs\n\nᴘᴏᴡᴇʀᴇᴅ ʙʏ ☞ : {message.chat.title} \n\n⚠️ ᴀꜰᴛᴇʀ 5 ᴍɪɴᴜᴛᴇꜱ ᴛʜɪꜱ ᴍᴇꜱꜱᴀɢᴇ ᴡɪʟʟ ʙᴇ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴅᴇʟᴇᴛᴇᴅ 🗑️\n\n</b>"
+        cap = f"<b>Tʜᴇ Rᴇꜱᴜʟᴛꜱ Fᴏʀ ☞ {search}\n\nRᴇǫᴜᴇsᴛᴇᴅ Bʏ ☞ {query.from_user.mention}\n\nʀᴇsᴜʟᴛ sʜᴏᴡ ɪɴ ☞ {remaining_seconds} sᴇᴄᴏɴᴅs\n\nᴘᴏᴡᴇʀᴇᴅ ʙʏ ☞ : {query.chat.title} \n\n⚠️ ᴀꜰᴛᴇʀ 5 ᴍɪɴᴜᴛᴇꜱ ᴛʜɪꜱ ᴍᴇꜱꜱᴀɢᴇ ᴡɪʟʟ ʙᴇ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴅᴇʟᴇᴛᴇᴅ 🗑️\n\n</b>"
         cap+="<b><u>🍿 Your Movie Files 👇</u></b>\n\n"
         for file in files:
             cap += f"<b>📁 <a href='https://telegram.me/{temp.U_NAME}?start=files_{file.file_id}'>[{get_size(file.file_size)}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file.file_name.split()))}\n\n</a></b>"
