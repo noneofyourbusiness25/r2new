@@ -2,7 +2,15 @@
 
 ## Issues Identified and Fixed
 
-### 1. **Missing Admin/Premium User Bypass in Verification**
+### 1. **Missing Verification Checks in File Callback Handlers (MAIN ISSUE)**
+**Problem**: The primary issue was that verification checks were missing in the file callback handlers in `pm_filter.py`. When users clicked on file buttons in groups, the bot was not checking if they were verified before allowing file access.
+
+**Solution**: Added verification checks in the file callback handlers:
+- Added verification check in `file#` callback handler (when users click individual file buttons)
+- Added verification check in `sendfiles#` callback handler (when users click "Get All Files" buttons)
+- Now when unverified users click file buttons, they get verification prompts with working links
+
+### 2. **Missing Admin/Premium User Bypass in Verification**
 **Problem**: The `check_verification` function in `utils.py` was not bypassing verification for admin users and premium users, causing even the bot admin to get verification prompts when trying to access files.
 
 **Solution**: Modified the `check_verification` function to check if the user is in `ADMINS` or `PREMIUM_USER` lists and return `True` immediately, bypassing the verification requirement.
@@ -13,7 +21,7 @@ if user.id in ADMINS or user.id in PREMIUM_USER:
     return True
 ```
 
-### 2. **Verification Link Processing in Start Command**
+### 3. **Verification Link Processing in Start Command**
 **Problem**: The start command was not properly handling verification links when users clicked them. The verification logic was placed in the wrong order and had duplicate handlers.
 
 **Solution**: 
@@ -21,7 +29,7 @@ if user.id in ADMINS or user.id in PREMIUM_USER:
 - Removed duplicate verification handler that was causing conflicts
 - Fixed the verification link processing to work correctly with the `/start verify-userid-token` format
 
-### 3. **Non-Persistent Verification Data**
+### 4. **Non-Persistent Verification Data**
 **Problem**: The `TOKENS` and `VERIFIED` dictionaries were reset every time the bot restarted, causing users to lose their verification status and making the system unreliable.
 
 **Solution**: 
@@ -30,17 +38,22 @@ if user.id in ADMINS or user.id in PREMIUM_USER:
 - Automatically save data when tokens are created or users are verified
 - Load data on bot startup to restore previous verification states
 
-### 4. **Configuration Check**
+### 5. **Configuration Check**
 **Current Admin Configuration**: The bot is configured with admin ID `1710896723` in the `ADMINS` environment variable. This user should now have automatic bypass of verification requirements.
 
 ## Files Modified
 
-1. **`utils.py`**:
+1. **`plugins/pm_filter.py`** (MAIN FIX):
+   - Added verification imports (`check_verification`, `get_token`)
+   - Added verification checks in file callback handlers (`file#` and `sendfiles#`)
+   - Now shows verification prompts when unverified users click file buttons
+
+2. **`utils.py`**:
    - Added admin/premium bypass to `check_verification()`
    - Added persistence functions for verification data
    - Added automatic saving when tokens are created or users verified
 
-2. **`plugins/commands.py`**:
+3. **`plugins/commands.py`**:
    - Added proper verification link handling in start command
    - Removed duplicate verification handler
    - Fixed verification flow order
