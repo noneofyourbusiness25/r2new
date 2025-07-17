@@ -832,9 +832,17 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     ]),
                     protect_content=True
                 )
-                await query.answer("Verification link sent to your PM!", show_alert=True)
+                await query.answer(
+                    text="Verification link sent! Click below to open the bot in PM.",
+                    show_alert=True,
+                    url=f"https://t.me/{temp.U_NAME}?start=verifyme"
+                )
             except Exception:
-                await query.answer("Please start the bot in PM so I can send you the verification link!", show_alert=True)
+                await query.answer(
+                    text="Please start the bot in PM so I can send you the verification link!",
+                    show_alert=True,
+                    url=f"https://t.me/{temp.U_NAME}?start=verifyme"
+                )
             return
         if CUSTOM_FILE_CAPTION:
             try:
@@ -886,9 +894,17 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     ]),
                     protect_content=True
                 )
-                await query.answer("Verification link sent to your PM!", show_alert=True)
+                await query.answer(
+                    text="Verification link sent! Click below to open the bot in PM.",
+                    show_alert=True,
+                    url=f"https://t.me/{temp.U_NAME}?start=verifyme"
+                )
             except Exception:
-                await query.answer("Please start the bot in PM so I can send you the verification link!", show_alert=True)
+                await query.answer(
+                    text="Please start the bot in PM so I can send you the verification link!",
+                    show_alert=True,
+                    url=f"https://t.me/{temp.U_NAME}?start=verifyme"
+                )
             return
         
         try:
