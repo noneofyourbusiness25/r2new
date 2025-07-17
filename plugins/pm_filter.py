@@ -832,7 +832,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     ]),
                     protect_content=True
                 )
-                await query.answer("Verification link sent to your PM!", show_alert=True)
+                await query.answer(url=verify_url)
             except Exception:
                 await query.answer("Please start the bot in PM so I can send you the verification link!", show_alert=True)
             return
@@ -886,7 +886,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     ]),
                     protect_content=True
                 )
-                await query.answer("Verification link sent to your PM!", show_alert=True)
+                await query.answer(url=verify_url)
             except Exception:
                 await query.answer("Please start the bot in PM so I can send you the verification link!", show_alert=True)
             return
